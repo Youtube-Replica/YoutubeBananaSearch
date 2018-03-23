@@ -70,6 +70,11 @@ public class Search {
                                 BaseDocument.class);
                         id= Integer.parseInt(cursor2.getKey());
                         searchObjectM.put("ID", id);
+                        searchObjectM.put("ChannelID", Integer.parseInt(""+myDocument2.getAttribute("channel_id")));
+                        String channel_id = ""+myDocument2.getAttribute("channel_id");
+                        BaseDocument myDocument3 = arangoDB.db(dbName).collection(collectionName).getDocument(channel_id,
+                                BaseDocument.class);
+                        searchObjectM.put("Channel Name ", myDocument3.getAttribute(""));
                         searchObjectM.put("Likes", Integer.parseInt(""+myDocument2.getAttribute("likes")));
                         searchObjectM.put("Dislikes", Integer.parseInt(""+myDocument2.getAttribute("dislikes")));
                         searchObjectM.put("Views", Integer.parseInt(""+myDocument2.getAttribute("views")));
