@@ -1,4 +1,4 @@
-package Model;
+package model;
 
 import com.arangodb.ArangoCursor;
 import com.arangodb.ArangoDB;
@@ -8,7 +8,6 @@ import com.arangodb.util.MapBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 public class Search {
@@ -16,16 +15,15 @@ public class Search {
     //Search for Videos by title and for Channel by name
     public static String getSearch(String s) {
         ArangoDB arangoDB = new ArangoDB.Builder().build();
-        String dbName = "subscriptions";
+        String dbName = "scalable";
         //First get by channel name
-        String collectionName = "Channels";
+        String collectionName = "channel";
         JSONObject searchObjectTotal = new JSONObject();
 
-        System.out.println("String we got:" + s);
         try {
-            String query = "FOR doc IN Channels\n" +
+            String query = "FOR doc IN channel\n" +
                    // "        FILTER doc.`Name` == @value\n" +
-                    "        FILTER CONTAINS(doc.`Name`, @value)" +
+                    "        FILTER CONTAINS(doc.info.name, @value)" +
                     "        RETURN doc";
             Map<String, Object> bindVars = new MapBuilder().put("value", s).get();
 
@@ -41,54 +39,61 @@ public class Search {
                     BaseDocument myDocument2 = arangoDB.db(dbName).collection(collectionName).getDocument(cursor2.getKey(),
                             BaseDocument.class);
                     id= Integer.parseInt(cursor2.getKey());
-                    searchObjectM.put("ID", id);
-                    searchObjectM.put("Name", myDocument2.getAttribute("Name"));
-                    searchObjectM.put("Category", myDocument2.getAttribute("Category"));
-                    searchObjectM.put("Profile Picture", myDocument2.getAttribute("ProfilePicture"));
+                    searchObjectM.put("channel_id",id);
+                    searchObjectM.put("info",myDocument2.getAttribute("info"));
+                    searchObjectM.put("subscriptions",myDocument2.getAttribute("subscriptions"));
+                    searchObjectM.put("watched_videos",myDocument2.getAttribute("watched_videos"));
+                    searchObjectM.put("blocked_channels",myDocument2.getAttribute("blocked_channels"));
+                    searchObjectM.put("notifications",myDocument2.getAttribute("notifications"));
                     searchArray.add(searchObjectM);
                 }
-                searchObjectTotal.put("Channel "+id,searchArray);
+                searchObjectTotal.put("channels",searchArray);
             }
 //            else{
                 JSONArray searchArray = new JSONArray();
-                query = "FOR doc IN Videos\n" +
+                query = "FOR doc IN video\n" +
                        // "        FILTER doc.`title` like @value\n" +
-                        "        FILTER CONTAINS(doc.`title`, @value)" +
+                        "        FILTER CONTAINS(doc.title, @value)" +
                         "        RETURN doc";
                 bindVars = new MapBuilder().put("value", s).get();
 
                 cursor = arangoDB.db(dbName).query(query, bindVars, null,
                         BaseDocument.class);
+
                 if(cursor.hasNext()) {
                     BaseDocument cursor2=null;
                     int id=0;
                     for (; cursor.hasNext(); ) {
+
                         cursor2 = cursor.next();
                         System.out.println(cursor2.getKey());
                         JSONObject searchObjectM = new JSONObject();
-                        BaseDocument myDocument2 = arangoDB.db(dbName).collection("Videos").getDocument(cursor2.getKey(),
+                        BaseDocument myDocument2 = arangoDB.db(dbName).collection("video").getDocument(cursor2.getKey(),
                                 BaseDocument.class);
                         id= Integer.parseInt(cursor2.getKey());
-                        searchObjectM.put("ID", id);
-                        searchObjectM.put("ChannelID", Integer.parseInt(""+myDocument2.getAttribute("channel_id")));
-                        String channel_id = ""+myDocument2.getAttribute("channel_id");
-                        BaseDocument myDocument3 = arangoDB.db(dbName).collection(collectionName).getDocument(channel_id,
-                                BaseDocument.class);
-                        searchObjectM.put("Channel Name ", myDocument3.getAttribute(""));
-                        searchObjectM.put("Likes", Integer.parseInt(""+myDocument2.getAttribute("likes")));
-                        searchObjectM.put("Dislikes", Integer.parseInt(""+myDocument2.getAttribute("dislikes")));
-                        searchObjectM.put("Views", Integer.parseInt(""+myDocument2.getAttribute("views")));
-                        searchObjectM.put("Thumbnail", myDocument2.getAttribute("thumbnail"));
-                        searchObjectM.put("Title", myDocument2.getAttribute("title"));
-                        searchObjectM.put("Category", myDocument2.getAttribute("category"));
-                        searchObjectM.put("Duration", Integer.parseInt(""+myDocument2.getAttribute("duration")));
-                        searchObjectM.put("Date Created", myDocument2.getAttribute("date_created"));
+
+                        searchObjectM.put("VideoID",id);
+                        searchObjectM.put("ChannelID",myDocument2.getAttribute("channel_id"));
+                        searchObjectM.put("Likes",myDocument2.getAttribute("likes"));
+                        searchObjectM.put("Dislikes",myDocument2.getAttribute("dislikes"));
+                        searchObjectM.put("Views",myDocument2.getAttribute("views"));
+                        searchObjectM.put("Title",myDocument2.getAttribute("title"));
+                        searchObjectM.put("Category",myDocument2.getAttribute("category"));
+                        searchObjectM.put("Duration",myDocument2.getAttribute("duration"));
+                        searchObjectM.put("Description",myDocument2.getAttribute("description"));
+                        searchObjectM.put("Qualities",myDocument2.getAttribute("qualities"));
+                        searchObjectM.put("Private",myDocument2.getAttribute("private"));
+                        searchObjectM.put("url",myDocument2.getAttribute("url"));
+                        searchObjectM.put("Date_Created",myDocument2.getAttribute("date_created"));
+                        searchObjectM.put("Date_Modified",myDocument2.getAttribute("date_modified"));
+
+
                         searchArray.add(searchObjectM);
                     }
-                    searchObjectTotal.put("Video "+id,searchArray);
+                    searchObjectTotal.put("videos",searchArray);
                 }
                 else{
-                    searchObjectTotal.put("Not found ",s);
+//                    searchObjectTotal.put("No Videos",s);
                 }
 //            }
         } catch (ArangoDBException e) {
@@ -96,7 +101,6 @@ public class Search {
         }
         System.out.println("Search Object" + searchObjectTotal.toString());
         return searchObjectTotal.toString();
-
 
     }
 

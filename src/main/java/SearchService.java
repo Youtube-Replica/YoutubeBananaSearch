@@ -1,6 +1,9 @@
-import Commands.Command;
-import Commands.Get.GetSearch;
+import commands.Command;
+import commands.RetrieveSearch;
 import com.rabbitmq.client.*;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -42,7 +45,7 @@ public class SearchService {
 
                     try {
                         String message = new String(body, "UTF-8");
-                        Command cmd = new GetSearch();
+                        Command cmd = (Command) Class.forName("commands."+getCommand(message)).newInstance();
                         HashMap<String, Object> props = new HashMap<String, Object>();
                         props.put("channel", channel);
                         props.put("properties", properties);
@@ -54,6 +57,14 @@ public class SearchService {
                         executor.submit(cmd);
                     } catch (RuntimeException e) {
                         System.out.println(" [.] " + e.toString());
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
                     } finally {
                         synchronized (this) {
                             this.notify();
@@ -67,5 +78,12 @@ public class SearchService {
             e.printStackTrace();
         }
 
+    }
+
+    public static String getCommand(String message) throws ParseException {
+        JSONParser parser = new JSONParser();
+        JSONObject messageJson = (JSONObject) parser.parse(message);
+        String result = messageJson.get("command").toString();
+        return result;
     }
 }

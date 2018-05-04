@@ -1,8 +1,8 @@
-package Commands.Get;
+package commands;
 
 
-import Commands.Command;
-import Model.Search;
+import commands.Command;
+import model.Search;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
@@ -13,7 +13,7 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class GetSearch extends Command {
+public class RetrieveSearch extends Command {
    public static String search_string = "";
    public void execute() {
        HashMap<String, Object> props = parameters;
@@ -26,7 +26,7 @@ public class GetSearch extends Command {
            JSONObject body = (JSONObject) parser.parse((String) props.get("body"));
            System.out.println(body.toString());
            JSONObject params = (JSONObject) parser.parse(body.get("parameters").toString());
-           search_string = params.get("searchStr").toString();
+           search_string = params.get("search_string").toString();
        } catch (ParseException e) {
            e.printStackTrace();
        }
