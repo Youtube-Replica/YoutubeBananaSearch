@@ -14,7 +14,8 @@ public class Search {
 
     //Search for Videos by title and for Channel by name
     public static String getSearch(String s) {
-        ArangoDB arangoDB = new ArangoDB.Builder().build();
+        String host = System.getenv("ARANGO_DB_SERVICE_HOST");
+        ArangoDB arangoDB = new ArangoDB.Builder().host(host, 8529).build();
         String dbName = "scalable";
         //First get by channel name
         String collectionName = "channel";
