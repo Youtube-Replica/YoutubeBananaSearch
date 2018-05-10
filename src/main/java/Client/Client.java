@@ -30,7 +30,7 @@ public class Client {
             clientBootstrap.group(group);
             clientBootstrap.channel(NioSocketChannel.class);
             clientBootstrap.remoteAddress(new InetSocketAddress("localhost", 9999));
-            clientBootstrap.handler(new Client.ClientHandler());
+            clientBootstrap.handler(new ClientHandler());
             ChannelFuture channelFuture = clientBootstrap.connect().sync();
 
             //any code related to client channel should be added here

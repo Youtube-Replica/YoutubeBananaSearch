@@ -11,7 +11,7 @@ public class ClientInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel channel) {
         ChannelPipeline pipeline = channel.pipeline();
 
-        pipeline.addLast(new Client.ClientHandler());
+        pipeline.addLast(new ClientHandler());
     }
 
 }

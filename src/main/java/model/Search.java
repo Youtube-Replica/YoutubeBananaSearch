@@ -17,7 +17,7 @@ public class Search {
 
     static ArangoDB arangoDB;
     static Search instance = new Search();
-    static String dbName = "scalable";
+    static String dbName = "subscriptions";
 
     private Search(){
         arangoDB = new ArangoDB.Builder().build();
@@ -36,9 +36,9 @@ public class Search {
         //First get by channel name
         JSONObject searchObjectTotal = new JSONObject();
 
-            String query = "FOR doc IN channel\n" +
+            String query = "FOR doc IN Channels\n" +
                    // "        FILTER doc.`Name` == @value\n" +
-                    "        FILTER CONTAINS(doc.info.name, @value)" +
+                    "        FILTER CONTAINS(doc.info.category, @value)" +
                     "        RETURN doc";
             Map<String, Object> bindVars = new MapBuilder().put("value", s).get();
 
@@ -52,7 +52,7 @@ public class Search {
                     JSONObject searchObjectM = new JSONObject();
                     cursor2 = cursor.next();
                     try {
-                        BaseDocument myDocument2 = arangoDB.db(dbName).collection("channel").getDocument(cursor2.getKey(),
+                        BaseDocument myDocument2 = arangoDB.db(dbName).collection("Channels").getDocument(cursor2.getKey(),
                                 BaseDocument.class);
                         id = Integer.parseInt(cursor2.getKey());
                         searchObjectM.put("channel_id", id);
@@ -71,9 +71,9 @@ public class Search {
             }
 
                 JSONArray searchArray = new JSONArray();
-                query = "FOR doc IN video\n" +
+                query = "FOR doc IN Videos\n" +
                        // "        FILTER doc.`title` like @value\n" +
-                        "        FILTER CONTAINS(doc.title, @value)" +
+                        "        FILTER CONTAINS(doc.category, @value)" +
                         "        RETURN doc";
                 bindVars = new MapBuilder().put("value", s).get();
 
@@ -88,7 +88,7 @@ public class Search {
                         System.out.println(cursor2.getKey());
                         JSONObject searchObjectM = new JSONObject();
                         try{
-                        BaseDocument myDocument2 = arangoDB.db(dbName).collection("video").getDocument(cursor2.getKey(),
+                        BaseDocument myDocument2 = arangoDB.db(dbName).collection("Videos").getDocument(cursor2.getKey(),
                                 BaseDocument.class);
                         id= Integer.parseInt(cursor2.getKey());
 
